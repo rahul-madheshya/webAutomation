@@ -16,7 +16,7 @@ public class ExcelDataProvider{
 	@DataProvider(name = "excelData")
 	public Object[][] excelDataProvider() throws IOException {
 		
-		Object[][] arrObj = getExcelData((System.getProperty("user.dir") + "//src//test//resources//TestData.xlsx"),
+		Object[][] arrObj = getExcelData((System.getProperty("user.dir") + "//src//main//resources//TestData.xlsx"),
 				EXCEL_DATA_SHEET_NAME);
 		return arrObj;
 	}

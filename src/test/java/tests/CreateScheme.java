@@ -22,6 +22,7 @@ public class CreateScheme extends BaseSetup {
 	@BeforeClass
 	void setupTest() {
 		ExcelDataProvider.EXCEL_DATA_SHEET_NAME = "SchemeMaster";
+		
 		// Initialize LoginPage and SchemeMaster objects
 		loginPage = new LoginPage(driver);
 		schemeMaster = new SchemeMaster(driver);
