@@ -93,6 +93,9 @@ public class SchemeMaster extends AbstractUtility {
 	@FindBy(xpath = "(//div[@role='presentation']/div[@role='alert']/div[@class='MuiAlert-message css-1pxa9xg-MuiAlert-message'])[1]")
 	WebElement dlg_ConfirmationMessage;
 
+	@FindBy(xpath = "//button[text()='x']")
+	WebElement btn_SchemeCreationWindow;
+
 	public void navigateToSchemeMaster() {
 		lbl_schemeMasterTile.click();
 	}
@@ -175,6 +178,10 @@ public class SchemeMaster extends AbstractUtility {
 				ddl_FeeType.get(i).click();
 			}
 		});
+	}
+
+	public void closeSchemeCreationWindow() {
+		btn_SchemeCreationWindow.click();
 	}
 
 	@SuppressWarnings("unused")

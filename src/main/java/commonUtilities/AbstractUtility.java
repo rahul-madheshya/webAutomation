@@ -69,9 +69,9 @@ public class AbstractUtility {
 		Thread.sleep((long) (sec * 1000));
 	}
 
-	public static int generateRandomNumber() {
+	public static int generateRandomNumber(int start, int end) {
 		Random random = new Random();
-		int random7DigitNumber = 1000000 + random.nextInt(9000000);
-		return random7DigitNumber;
+		int randomNumber = start + random.nextInt(end);
+		return randomNumber;
 	}
 }

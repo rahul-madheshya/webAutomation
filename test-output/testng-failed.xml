@@ -7,7 +7,7 @@
         <methods>
           <include name="setupTest"/>
           <include name="setupBrowser"/>
-          <include name="createScheme" invocation-numbers="0"/>
+          <include name="createScheme" invocation-numbers="1"/>
           <include name="closeBrowser"/>
         </methods>
       </class> <!-- tests.CreateScheme -->

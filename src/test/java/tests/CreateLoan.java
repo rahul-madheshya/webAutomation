@@ -68,7 +68,7 @@ public class CreateLoan extends BaseSetup {
 		loanMaker_Stage7.submit_NetDisbursementDetails();
 
 		LoanMaker_Stage8 loanMaker_Stage8 = new LoanMaker_Stage8(driver);
-		loanMaker_Stage8.input_AdditionalGoldInformation(("GLBS" + AbstractUtility.generateRandomNumber()), "44.34");
+		loanMaker_Stage8.input_AdditionalGoldInformation(("GLBS" + AbstractUtility.generateRandomNumber(1000000, 9000000)), "44.34");
 
 		LoanMaker_Stage9 loanMaker_Stage9 = new LoanMaker_Stage9(driver);
 		loanMaker_Stage9.submit_CustomerLoanDetails();
