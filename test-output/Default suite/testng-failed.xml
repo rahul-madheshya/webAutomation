@@ -3,14 +3,14 @@
 <suite name="Failed suite [Default suite]" guice-stage="DEVELOPMENT">
   <test thread-count="5" name="Default test(failed)">
     <classes>
-      <class name="tests.CreateScheme">
+      <class name="tests.CreateLoan">
         <methods>
-          <include name="setupTest"/>
+          <include name="createLoan"/>
           <include name="setupBrowser"/>
-          <include name="createScheme" invocation-numbers="1"/>
           <include name="closeBrowser"/>
+          <include name="setupTest"/>
         </methods>
-      </class> <!-- tests.CreateScheme -->
+      </class> <!-- tests.CreateLoan -->
     </classes>
   </test> <!-- Default test(failed) -->
 </suite> <!-- Failed suite [Default suite] -->

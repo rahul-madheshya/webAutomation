@@ -41,8 +41,10 @@ public class LoanCreationDeviation extends AbstractUtility {
 			getListOfDeviationDecisions.get(count).click();
 			selectDicision.get(2).click();
 		}
+		waitForElementToBeVisible(buttonSubmit);
+		scrollToElement(buttonSubmit);
 		buttonSubmit.click();
-		waitForElementToBeClickable(buttonConfirmDeviationSubmission);
+		waitForElementToBeVisible(buttonConfirmDeviationSubmission);
 		buttonConfirmDeviationSubmission.click();
 	}
 	

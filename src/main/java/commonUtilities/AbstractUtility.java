@@ -13,9 +13,8 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
+import org.openqa.selenium.JavascriptExecutor;
 import configuration.baseSetup.BaseSetup;
-
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.NoSuchElementException;
@@ -33,12 +32,12 @@ public class AbstractUtility {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 		wait.until(ExpectedConditions.elementToBeClickable(element));
 	}
-	
+
 	protected void waitForElementToBeVisible(WebElement element) {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 		wait.until(ExpectedConditions.visibilityOf(element));
 	}
-	
+
 	protected void fluentWait(WebElement element) {
 		Wait<WebDriver> wait = new FluentWait<>(driver).withTimeout(Duration.ofSeconds(35))
 				.pollingEvery(Duration.ofSeconds(5)).ignoring(NoSuchElementException.class);
@@ -50,11 +49,16 @@ public class AbstractUtility {
 		Alert alert = wait.until(ExpectedConditions.alertIsPresent());
 		alert.accept();
 	}
-	
+
+	protected void scrollToElement(WebElement element) {
+		JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
+		jsExecutor.executeScript("arguments[0].scrollIntoView(true);", element);
+	}
+
 	protected String getAlertMessage(WebElement element) {
 		return driver.switchTo().alert().getText();
 	}
-	
+
 	protected void performKeyboardAction(String action, int count) {
 		Actions actions = new Actions(driver);
 		switch (action) {
