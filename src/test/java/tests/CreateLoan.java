@@ -1,15 +1,32 @@
 package tests;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.aventstack.extentreports.Status;
-
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterClass;
 import commonUtilities.AbstractUtility;
 import commonUtilities.ExcelDataProvider;
 import configuration.baseSetup.BaseSetup;
-import pageObjects.loanDisbursal.*;
+import pageObjects.loanDisbursal.CreateNewApplication;
+import pageObjects.loanDisbursal.LoanCreationChecker;
+import pageObjects.loanDisbursal.LoanCreationDeviation;
+import pageObjects.loanDisbursal.LoanCreationDisbursement;
+import pageObjects.loanDisbursal.LoanDisbursal;
+import pageObjects.loanDisbursal.LoanDisbursalSearch;
+import pageObjects.loanDisbursal.LoanMaker_Stage1;
+import pageObjects.loanDisbursal.LoanMaker_Stage2;
+import pageObjects.loanDisbursal.LoanMaker_Stage3;
+import pageObjects.loanDisbursal.LoanMaker_Stage4;
+import pageObjects.loanDisbursal.LoanMaker_Stage5;
+import pageObjects.loanDisbursal.LoanMaker_Stage6;
+import pageObjects.loanDisbursal.LoanMaker_Stage7;
+import pageObjects.loanDisbursal.LoanMaker_Stage8;
+import pageObjects.loanDisbursal.LoanMaker_Stage9;
 import pageObjects.login.LoginPage;
+import pageObjects.schemeMaster.SchemeMaster;
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.Status;
 
 public class CreateLoan extends BaseSetup {
 
@@ -32,8 +49,75 @@ public class CreateLoan extends BaseSetup {
 
 	@BeforeClass
 	void setupTest() {
-		ExcelDataProvider.EXCEL_DATA_SHEET_NAME = "SchemeMaster";
+		ExcelDataProvider.EXCEL_DATA_SHEET_NAME = "LoanCreationData";
+
+		// Initialize all the required page objects
 		initializePageObjects();
+	}
+
+	@Test(dataProvider = "excelData", dataProviderClass = ExcelDataProvider.class)
+	void createScheme(String testCaseId, String testCaseName, String customerId, String loanAmount,
+			String goldPouchNumber, String applicationNumber) throws InterruptedException {
+		switch (testCaseId) {
+		case "TC_01":
+			try {
+
+				// Start logging the test case in the Extent Report
+				test = extent.createTest(testCaseName, "test for creating a new loan with provided data");
+
+				// Log into the application
+				loginPage.loginGoldLoan("CGCL2014");
+				test.log(Status.INFO, "logged in successfully with user CGCL2014");
+
+				// Navigate to Loan Disbursal
+				loanDisbursal.navigateToLoanDisbursal();
+				test.log(Status.INFO, "navigated to Loan Disbursal page");
+
+				// Navigate to Create Loan Page
+				loanDisbursal.navigateToCreateNewLoanPage();
+
+				loanDisbursalSearch.getCustomerDetails(customerId);
+				loanDisbursalSearch.proceedToNewLoanCreation();
+				test.log(Status.INFO, "fetched customer details and proceeded to new loan creation");
+
+				createNewApplication.input_AppliedLoanDetails(loanAmount);
+				test.log(Status.INFO, "entered colendar and loan amount details to create new loan application");
+
+				completeMakerJourney(loanAmount, goldPouchNumber);
+				test.log(Status.INFO, "entered rrquired details to complete all the stages of maker journey");
+
+				logoutAndLoginWithEmployeeCode("CGCL002");
+				loanDisbursal.navigateToLoanDisbursal();
+				applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
+				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
+				loanDisbursal.startWithSearchedApplication();
+				loanCreationDeviation.submit_DeviationRemarks();
+				loanDisbursal.startWithSearchedApplication();
+				loanCreationChecker.submit_CheckerRemarks();
+				test.log(Status.INFO,
+						"logout Maker user and login with super user to complete the deviation and checker stage");
+
+				logoutAndLoginWithEmployeeCode("CGCL2014");
+				test.log(Status.INFO,
+						"logout super user and login with maker user to complete disbursement of the newly created application");
+
+				loanDisbursal.navigateToLoanDisbursal();
+				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
+				loanDisbursal.startWithSearchedApplication();
+				loanCreationDisbursement.submit_DisbursmentDetails();
+
+				if (loanCreationDisbursement.getMessage().startsWith("Congratulations, the loan account number"))
+					test.log(Status.PASS, loanCreationDisbursement.getMessage());
+				else
+					test.log(Status.FAIL, loanCreationDisbursement.getMessage());
+
+			} catch (Exception exception) {
+				// Log the failure in the report
+				test.log(Status.FAIL, "Test failed due to: " + exception.getMessage());
+				throw exception;
+			}
+			break;
+		}
 	}
 
 	private void initializePageObjects() {
@@ -55,48 +139,7 @@ public class CreateLoan extends BaseSetup {
 		loanCreationDisbursement = new LoanCreationDisbursement(driver);
 	}
 
-	@Test
-	void createLoan() throws InterruptedException {
-		try {
-			// Start logging the test case in the Extent Report
-			test = extent.createTest("CreateLoan", "Test for creating a new scheme with provided data");
-
-			// Step 1: Login as Maker
-			loginAndNavigateToLoanPage("CGCL2014");
-			test.log(Status.INFO, "Logged in successfully with user CGCL2014");
-
-			// Step 2: Create new loan
-			createLoanProcess("1344287", "15000");
-			test.log(Status.INFO, "Created new loan application and completed maker journey");
-
-			// Step 3: Logout as Maker and Login as Checker for approval
-			approveLoan();
-			test.log(Status.INFO, "Aprroved the deviation and completed checker journey");
-
-			// Step 4: Finalize loan disbursement
-			disburseLoan();
-			test.log(Status.INFO, "Disbursed the loan");
-
-		} catch (Exception e) {
-			// Log the failure in the report
-			test.log(Status.FAIL, "Test failed due to: " + e.getMessage());
-			throw e;
-		}
-	}
-
-	private void loginAndNavigateToLoanPage(String username) throws InterruptedException {
-		loginPage.loginGoldLoan(username);
-		loanDisbursal.navigateToLoanDisbursal();
-		loanDisbursal.navigateToCreateNewLoanPage();
-	}
-
-	private void createLoanProcess(String customerId, String loanAmount) throws InterruptedException {
-		loanDisbursalSearch.getCustomerDetails(customerId);
-		createNewApplication.input_AppliedLoanDetails(loanAmount);
-		completeLoanMakerStages(loanAmount);
-	}
-
-	private void completeLoanMakerStages(String loanAmount) throws InterruptedException {
+	private void completeMakerJourney(String loanAmount, String goldPouchNumber) throws InterruptedException {
 		loanMaker_Stage1.input_CollateralDetails();
 		loanMaker_Stage2.input_ConsolidatedCollateralDetails();
 		loanMaker_Stage3.input_GoldInformation();
@@ -104,32 +147,15 @@ public class CreateLoan extends BaseSetup {
 		loanMaker_Stage5.submit_FeeDetails();
 		loanMaker_Stage6.submit_FundTrasferDetails();
 		loanMaker_Stage7.submit_NetDisbursementDetails();
-		loanMaker_Stage8.input_AdditionalGoldInformation(
-				"GLBS" + AbstractUtility.generateRandomNumber(1000000, 9000000), "44.34");
+		goldPouchNumber = "GLBS" + AbstractUtility.generateRandomNumber(1000000, 9999999);
+		loanMaker_Stage8.input_AdditionalGoldInformation(goldPouchNumber, "1000");
 		loanMaker_Stage9.submit_CustomerLoanDetails();
+
 	}
 
-	private void approveLoan() throws InterruptedException {
-		logoutAndLoginAsChecker();
-		String applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
-		loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
-		loanCreationDeviation.submit_DeviationRemarks();
-		loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
-		loanCreationChecker.submit_CheckerRemarks();
-	}
-
-	private void logoutAndLoginAsChecker() throws InterruptedException {
+	private void logoutAndLoginWithEmployeeCode(String empCode) throws InterruptedException {
 		loginPage.logoutGoldLoan();
-		loginPage.loginGoldLoan("CGCL002");
-		loanDisbursal.navigateToLoanDisbursal();
+		loginPage.loginGoldLoan(empCode);
 	}
 
-	private void disburseLoan() throws InterruptedException {
-		loginPage.logoutGoldLoan();
-		loginPage.loginGoldLoan("CGCL2014");
-		loanDisbursal.navigateToLoanDisbursal();
-		String applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
-		loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
-		loanCreationDisbursement.submit_DisbursmentDetails();
-	}
 }

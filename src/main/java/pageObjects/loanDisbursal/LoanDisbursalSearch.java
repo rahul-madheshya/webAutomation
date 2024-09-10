@@ -6,7 +6,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 public class LoanDisbursalSearch {
-	
+
 	WebDriver driver;
 
 	public LoanDisbursalSearch(WebDriver driver) {
@@ -19,13 +19,16 @@ public class LoanDisbursalSearch {
 
 	@FindBy(xpath = "//button[text()='Search']")
 	WebElement button_searchCustomerId;
-	
+
 	@FindBy(xpath = "//button[text()='Create New Loan']")
 	WebElement button_CreateNewLoan;
-	
+
 	public void getCustomerDetails(String customerId) {
 		input_CustomerId.sendKeys(customerId);
 		button_searchCustomerId.click();
-		button_CreateNewLoan.click();;
+	}
+
+	public void proceedToNewLoanCreation() {
+		button_CreateNewLoan.click();
 	}
 }

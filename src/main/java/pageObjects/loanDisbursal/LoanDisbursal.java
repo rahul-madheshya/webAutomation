@@ -69,7 +69,6 @@ public class LoanDisbursal extends AbstractUtility {
 		selectSearchByApplicationNumber.click();
 		inputSearchByApplicationNumber.sendKeys(ApplicationNumber);
 		search.click();
-		get_ApplicationLists.get(0).click();
 	}
 
 	public void searchApplicationByMobileNumber(String MobileNumber) {
@@ -80,6 +79,11 @@ public class LoanDisbursal extends AbstractUtility {
 
 	public void navigateToCreateNewLoanPage() {
 		button_CreateNewLoan.click();
+	}
+	
+	public void startWithSearchedApplication()
+	{
+		get_ApplicationLists.get(0).click();
 	}
 	
 	public String getNewCreatedLoanApplicationNumber()

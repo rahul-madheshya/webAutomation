@@ -30,10 +30,13 @@ public class LoanCreationDisbursement extends AbstractUtility {
 
 	@FindBy(xpath = "//button[text()='Disburse']")
 	WebElement buttonDisburse;
-	
-	@FindBy(xpath = "//div[@role='dialog']/div/p")
-	WebElement dailogLoanDisbursedMessage;
-	
+
+	@FindBy(xpath = "//div[@class='MuiAlert-message css-1pxa9xg-MuiAlert-message']/div")
+	WebElement dailogErrorMessage;
+
+	@FindBy(xpath = "(//div[@role='presentation']/div[@role='alert']/div[@class='MuiAlert-message css-1pxa9xg-MuiAlert-message'])[1]")
+	WebElement dailogSucessfullMessage;
+
 	public void submit_DisbursmentDetails() throws InterruptedException {
 		buttonSendOTP.click();
 		waitForElementToBeVisible(inputOTP);
@@ -42,7 +45,21 @@ public class LoanCreationDisbursement extends AbstractUtility {
 		buttonVerifyOTP.click();
 		waitforSecond(2);
 		buttonDisburse.click();
-		waitForElementToBeVisible(dailogLoanDisbursedMessage);
-		System.out.println(dailogLoanDisbursedMessage.getText());
+	}
+
+	public String getMessage() throws InterruptedException {
+		String message = "No message available";
+		waitforSecond(12);
+		try {
+			if (dailogSucessfullMessage.isDisplayed()) {
+				message = dailogSucessfullMessage.getText();
+			} else if (dailogErrorMessage.isDisplayed()) {
+				message = dailogErrorMessage.getText();
+			}
+		} catch (Exception e) {
+			// Log the exception if needed
+			System.out.println("No alert message found: " + e.getMessage());
+		}
+		return message;
 	}
 }

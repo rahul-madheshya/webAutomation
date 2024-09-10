@@ -32,7 +32,7 @@ public class LoanMaker_Stage7 extends AbstractUtility {
 		waitForElementToBeClickable(getListOfDisbursmentMode);
 		getListOfDisbursmentMode.click();
 		selectDisbursmentMode.get(1).click();
-		waitForElementToBeClickable(button_submitMakerStage7);
+		Thread.sleep(500);
 		button_submitMakerStage7.click();
 	}
 }
