@@ -6,7 +6,7 @@
       <class name="tests.CreateLoan">
         <methods>
           <include name="setupBrowser"/>
-          <include name="createScheme" invocation-numbers="0"/>
+          <include name="createScheme" invocation-numbers="1"/>
           <include name="closeBrowser"/>
           <include name="setupTest"/>
         </methods>

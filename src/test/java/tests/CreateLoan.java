@@ -168,9 +168,10 @@ public class CreateLoan extends BaseSetup {
 
 				logoutAndLoginWithEmployeeCode("CGCL002");
 				loanDisbursal.navigateToLoanDisbursal();
+				
 				applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
 				ExcelReadAndWrite.writeDataToExcel(rowIndex, "Application_Number", applicationNumber);
-
+				
 				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
 				loanDisbursal.startWithSearchedApplication();
 				loanCreationDeviation.submit_DeviationRemarks();
@@ -231,7 +232,7 @@ public class CreateLoan extends BaseSetup {
 		loanMaker_Stage5.submit_FeeDetails();
 		loanMaker_Stage6.submit_FundTrasferDetails();
 		loanMaker_Stage7.submit_NetDisbursementDetails();
-		goldPouchNumber = "GLBS" + AbstractUtility.generateRandomNumber(1000000, 9999999);
+		goldPouchNumber = "GLBS" + AbstractUtility.generateRandomNumber(1111111, 9999999);
 		loanMaker_Stage8.input_AdditionalGoldInformation(goldPouchNumber, "1000");
 		loanMaker_Stage9.submit_CustomerLoanDetails();
 

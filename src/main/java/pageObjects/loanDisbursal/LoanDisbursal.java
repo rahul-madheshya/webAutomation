@@ -52,8 +52,11 @@ public class LoanDisbursal extends AbstractUtility {
 	@FindBy(xpath = "//button[text()='Create New Loan']")
 	WebElement button_CreateNewLoan;
 
+	@FindBy(xpath = "//div[@data-id]/div[4][@data-field='loan_account_no']")
+	List<WebElement> lst_CreatedLoanAccountNumber;
+	
 	@FindBy(xpath = "//div[@data-id]/div[5][@data-field='application_no']")
-	List<WebElement> get_ApplicationLists;
+	List<WebElement> lst_CreatedApplicationNumber;
 
 	public void navigateToLoanDisbursal() {
 		loanDisbursalTile.click();
@@ -83,11 +86,16 @@ public class LoanDisbursal extends AbstractUtility {
 	
 	public void startWithSearchedApplication()
 	{
-		get_ApplicationLists.get(0).click();
+		lst_CreatedApplicationNumber.get(0).click();
 	}
 	
 	public String getNewCreatedLoanApplicationNumber()
 	{
-		return get_ApplicationLists.get(0).getText();
+		return lst_CreatedApplicationNumber.get(0).getText();
+	}
+	
+	public String getNewCreatedLoanAccountNumber()
+	{
+		return lst_CreatedApplicationNumber.get(0).getText();
 	}
 }
