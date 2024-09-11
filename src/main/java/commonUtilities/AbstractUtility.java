@@ -44,6 +44,16 @@ public class AbstractUtility {
 		wait.until(ExpectedConditions.visibilityOf(element));
 	}
 
+	protected boolean checkIfElementIsPresent(WebElement element) {
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+            wait.until(ExpectedConditions.visibilityOf(element)); 
+            return true;  
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 	protected void waitForAlertAndAccept() {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		Alert alert = wait.until(ExpectedConditions.alertIsPresent());

@@ -34,7 +34,7 @@ public class LoanCreationDisbursement extends AbstractUtility {
 	@FindBy(xpath = "//div[@class='MuiAlert-message css-1pxa9xg-MuiAlert-message']/div")
 	WebElement dailogErrorMessage;
 
-	@FindBy(xpath = "(//div[@role='presentation']/div[@role='alert']/div[@class='MuiAlert-message css-1pxa9xg-MuiAlert-message'])[1]")
+	@FindBy(xpath = "//div/p[contains(text(),'Congratulations, the loan account number')]")
 	WebElement dailogSucessfullMessage;
 
 	public void submit_DisbursmentDetails() throws InterruptedException {
@@ -49,15 +49,13 @@ public class LoanCreationDisbursement extends AbstractUtility {
 
 	public String getMessage() throws InterruptedException {
 		String message = "No message available";
-		waitforSecond(12);
 		try {
-			if (dailogSucessfullMessage.isDisplayed()) {
+			if (checkIfElementIsPresent(dailogSucessfullMessage)) {
 				message = dailogSucessfullMessage.getText();
-			} else if (dailogErrorMessage.isDisplayed()) {
+			} else if (checkIfElementIsPresent(dailogErrorMessage)) {
 				message = dailogErrorMessage.getText();
 			}
 		} catch (Exception e) {
-			// Log the exception if needed
 			System.out.println("No alert message found: " + e.getMessage());
 		}
 		return message;

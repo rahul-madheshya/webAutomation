@@ -56,7 +56,7 @@ public class CreateLoan extends BaseSetup {
 	}
 
 	@Test(dataProvider = "excelData", dataProviderClass = ExcelDataProvider.class)
-	void createScheme(String testCaseId, String testCaseName, String customerId, String loanAmount,
+	void createScheme(String testCaseId, String testCaseName, String customerId, String loanAmount, String schemeName,
 			String goldPouchNumber, String applicationNumber) throws InterruptedException {
 		switch (testCaseId) {
 		case "TC_01":
@@ -67,7 +67,12 @@ public class CreateLoan extends BaseSetup {
 
 				// Log into the application
 				loginPage.loginGoldLoan("CGCL2014");
-				test.log(Status.INFO, "logged in successfully with user CGCL2014");
+				if (driver.getCurrentUrl().equalsIgnoreCase("https://cggl-dev.capriglobal.in/dashboard")) {
+					test.log(Status.PASS, "logged in successfully with user CGCL2014");
+				} else {
+					test.log(Status.FAIL, "login failed");
+
+				}
 
 				// Navigate to Loan Disbursal
 				loanDisbursal.navigateToLoanDisbursal();
@@ -83,7 +88,7 @@ public class CreateLoan extends BaseSetup {
 				createNewApplication.input_AppliedLoanDetails(loanAmount);
 				test.log(Status.INFO, "entered colendar and loan amount details to create new loan application");
 
-				completeMakerJourney(loanAmount, goldPouchNumber);
+				completeMakerJourney(loanAmount, schemeName, goldPouchNumber);
 				test.log(Status.INFO, "entered rrquired details to complete all the stages of maker journey");
 
 				logoutAndLoginWithEmployeeCode("CGCL002");
@@ -139,11 +144,11 @@ public class CreateLoan extends BaseSetup {
 		loanCreationDisbursement = new LoanCreationDisbursement(driver);
 	}
 
-	private void completeMakerJourney(String loanAmount, String goldPouchNumber) throws InterruptedException {
+	private void completeMakerJourney(String loanAmount, String schemeName, String goldPouchNumber) throws InterruptedException {
 		loanMaker_Stage1.input_CollateralDetails();
 		loanMaker_Stage2.input_ConsolidatedCollateralDetails();
 		loanMaker_Stage3.input_GoldInformation();
-		loanMaker_Stage4.input_schemeDetails(loanAmount);
+		loanMaker_Stage4.input_schemeDetails(loanAmount, schemeName);
 		loanMaker_Stage5.submit_FeeDetails();
 		loanMaker_Stage6.submit_FundTrasferDetails();
 		loanMaker_Stage7.submit_NetDisbursementDetails();
