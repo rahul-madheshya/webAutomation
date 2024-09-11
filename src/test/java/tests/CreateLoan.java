@@ -5,7 +5,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterClass;
 import commonUtilities.AbstractUtility;
-import commonUtilities.ExcelDataProvider;
+import commonUtilities.ExcelReadAndWrite;
 import configuration.baseSetup.BaseSetup;
 import pageObjects.loanDisbursal.CreateNewApplication;
 import pageObjects.loanDisbursal.LoanCreationChecker;
@@ -27,6 +27,9 @@ import pageObjects.schemeMaster.SchemeMaster;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.Status;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CreateLoan extends BaseSetup {
 
@@ -46,18 +49,21 @@ public class CreateLoan extends BaseSetup {
 	private LoanCreationDeviation loanCreationDeviation;
 	private LoanCreationChecker loanCreationChecker;
 	private LoanCreationDisbursement loanCreationDisbursement;
+	private static Map<String, Integer> testMethodCounts = new HashMap<>(); // Keeps track of loop counts for each
+																			// method
 
 	@BeforeClass
 	void setupTest() {
-		ExcelDataProvider.EXCEL_DATA_SHEET_NAME = "LoanCreationData";
+		ExcelReadAndWrite.EXCEL_DATA_SHEET_NAME = "LoanCreationData";
 
 		// Initialize all the required page objects
 		initializePageObjects();
 	}
 
-	@Test(dataProvider = "excelData", dataProviderClass = ExcelDataProvider.class)
+	@Test(dataProvider = "excelData", dataProviderClass = ExcelReadAndWrite.class)
 	void createScheme(String testCaseId, String testCaseName, String customerId, String loanAmount, String schemeName,
-			String goldPouchNumber, String applicationNumber) throws InterruptedException {
+			String goldPouchNumber, String applicationNumber, Method method) throws Exception {
+		int rowIndex = getTestMethodIndex(method) + 1;
 		switch (testCaseId) {
 		case "TC_01":
 			try {
@@ -94,6 +100,77 @@ public class CreateLoan extends BaseSetup {
 				logoutAndLoginWithEmployeeCode("CGCL002");
 				loanDisbursal.navigateToLoanDisbursal();
 				applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
+				ExcelReadAndWrite.writeDataToExcel(rowIndex, "Application_Number", applicationNumber);
+
+				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
+				loanDisbursal.startWithSearchedApplication();
+				loanCreationDeviation.submit_DeviationRemarks();
+				loanDisbursal.startWithSearchedApplication();
+				loanCreationChecker.submit_CheckerRemarks();
+				test.log(Status.INFO,
+						"logout Maker user and login with super user to complete the deviation and checker stage");
+
+				logoutAndLoginWithEmployeeCode("CGCL2014");
+				test.log(Status.INFO,
+						"logout super user and login with maker user to complete disbursement of the newly created application");
+
+				loanDisbursal.navigateToLoanDisbursal();
+				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
+				loanDisbursal.startWithSearchedApplication();
+				loanCreationDisbursement.submit_DisbursmentDetails();
+
+				if (loanCreationDisbursement.getMessage().startsWith("Congratulations, the loan account number"))
+					test.log(Status.PASS, loanCreationDisbursement.getMessage());
+				else
+					test.log(Status.FAIL, loanCreationDisbursement.getMessage());
+
+			} catch (Exception exception) {
+				// Log the failure in the report
+				test.log(Status.FAIL, "Test failed due to: " + exception.getMessage());
+				throw exception;
+			}
+			break;
+		case "TC_02":
+			try {
+
+				// Start logging the test case in the Extent Report
+				test = extent.createTest(testCaseName, "test for creating a new loan with provided data");
+
+				if(!driver.getCurrentUrl().equalsIgnoreCase(baseUrl))
+				{
+					driver.navigate().to(baseUrl);
+				}
+				// Log into the application
+				loginPage.loginGoldLoan("CGCL2014");
+				if (driver.getCurrentUrl().equalsIgnoreCase("https://cggl-dev.capriglobal.in/dashboard")) {
+					test.log(Status.PASS, "logged in successfully with user CGCL2014");
+				} else {
+					test.log(Status.FAIL, "login failed");
+
+				}
+
+				// Navigate to Loan Disbursal
+				loanDisbursal.navigateToLoanDisbursal();
+				test.log(Status.INFO, "navigated to Loan Disbursal page");
+
+				// Navigate to Create Loan Page
+				loanDisbursal.navigateToCreateNewLoanPage();
+
+				loanDisbursalSearch.getCustomerDetails(customerId);
+				loanDisbursalSearch.proceedToNewLoanCreation();
+				test.log(Status.INFO, "fetched customer details and proceeded to new loan creation");
+
+				createNewApplication.input_AppliedLoanDetails(loanAmount);
+				test.log(Status.INFO, "entered colendar and loan amount details to create new loan application");
+
+				completeMakerJourney(loanAmount, schemeName, goldPouchNumber);
+				test.log(Status.INFO, "entered rrquired details to complete all the stages of maker journey");
+
+				logoutAndLoginWithEmployeeCode("CGCL002");
+				loanDisbursal.navigateToLoanDisbursal();
+				applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
+				ExcelReadAndWrite.writeDataToExcel(rowIndex, "Application_Number", applicationNumber);
+
 				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
 				loanDisbursal.startWithSearchedApplication();
 				loanCreationDeviation.submit_DeviationRemarks();
@@ -123,6 +200,7 @@ public class CreateLoan extends BaseSetup {
 			}
 			break;
 		}
+
 	}
 
 	private void initializePageObjects() {
@@ -144,7 +222,8 @@ public class CreateLoan extends BaseSetup {
 		loanCreationDisbursement = new LoanCreationDisbursement(driver);
 	}
 
-	private void completeMakerJourney(String loanAmount, String schemeName, String goldPouchNumber) throws InterruptedException {
+	private void completeMakerJourney(String loanAmount, String schemeName, String goldPouchNumber)
+			throws InterruptedException {
 		loanMaker_Stage1.input_CollateralDetails();
 		loanMaker_Stage2.input_ConsolidatedCollateralDetails();
 		loanMaker_Stage3.input_GoldInformation();
@@ -161,6 +240,18 @@ public class CreateLoan extends BaseSetup {
 	private void logoutAndLoginWithEmployeeCode(String empCode) throws InterruptedException {
 		loginPage.logoutGoldLoan();
 		loginPage.loginGoldLoan(empCode);
+	}
+
+	private int getTestMethodIndex(Method method) {
+		// A static counter that increments with every invocation of the DataProvider
+		String methodName = method.getName();
+		// Track the loop count for this specific test case using method name as key
+		if (!testMethodCounts.containsKey(methodName)) {
+			testMethodCounts.put(methodName, 0);
+		}
+		int currentCount = testMethodCounts.get(methodName);
+		testMethodCounts.put(methodName, currentCount + 1);
+		return currentCount;
 	}
 
 }

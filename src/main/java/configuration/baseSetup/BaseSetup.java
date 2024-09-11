@@ -69,7 +69,7 @@ public class BaseSetup {
 	@AfterSuite
 	public void closeBrowser() {
 		if (driver != null) {
-			// driver.quit();
+			driver.quit();
 		}
 		ExtentReportSetup.tearDownExtentReport();
 	}

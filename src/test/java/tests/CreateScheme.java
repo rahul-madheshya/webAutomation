@@ -4,9 +4,8 @@ import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterClass;
-
 import commonUtilities.AbstractUtility;
-import commonUtilities.ExcelDataProvider;
+import commonUtilities.ExcelReadAndWrite;
 import configuration.baseSetup.BaseSetup;
 import pageObjects.login.LoginPage;
 import pageObjects.schemeMaster.SchemeMaster;
@@ -22,14 +21,14 @@ public class CreateScheme extends BaseSetup {
 
 	@BeforeClass
 	void setupTest() {
-		ExcelDataProvider.EXCEL_DATA_SHEET_NAME = "SchemeMaster";
+		ExcelReadAndWrite.EXCEL_DATA_SHEET_NAME = "SchemeMaster";
 
 		// Initialize LoginPage and SchemeMaster objects
 		loginPage = new LoginPage(driver);
 		schemeMaster = new SchemeMaster(driver);
 	}
 
-	@Test(dataProvider = "excelData", dataProviderClass = ExcelDataProvider.class)
+	@Test(dataProvider = "excelData", dataProviderClass = ExcelReadAndWrite.class)
 	void createScheme(String testCaseId, String testCaseName, String schemeName, String schemeCalendar,
 			String schemeDescription, String schemeType, String schemeLTV, String schemeMinimumLoanAmount,
 			String schemeMaximumLoanAmount, String schemeRateOfInterest, String schemeLoanTenure,
@@ -55,8 +54,9 @@ public class CreateScheme extends BaseSetup {
 						schemeMinimumLoanAmount, schemeMaximumLoanAmount, schemeRateOfInterest, schemeLoanTenure,
 						schemeAdditionalRateOfInterest, schemeRepaymentFrequency, schemeFeeName, schemeFeeType,
 						schemeFeeAmount);
+				test.log(Status.INFO, "Alert Message : " + schemeMaster.getValidationMessage());
 				if (schemeMaster.getValidationMessage().equalsIgnoreCase("Scheme name exists.")) {
-					test.log(Status.PASS, "Duplicate scheme creation validation passed");
+					test.log(Status.PASS, "Duplicate scheme creation validation passed.");
 				} else {
 					test.log(Status.FAIL, "Duplicate scheme creation validation failed.");
 				}
@@ -68,21 +68,36 @@ public class CreateScheme extends BaseSetup {
 			}
 			break;
 		case "TC_02":
-			try {
-
-				schemeMaster.closeSchemeCreationWindow();
-				
+			try {				
 				// Start logging the test case in the Extent Report
 				test = extent.createTest(testCaseName, "Test for creating a new scheme with provided data");
 				
 				schemeName += " " + AbstractUtility.generateRandomNumber(100, 900);
 				schemeDescription += " " + AbstractUtility.generateRandomNumber(100, 900);
+				
+				if(!driver.getCurrentUrl().equalsIgnoreCase(baseUrl))
+				{
+					driver.navigate().to(baseUrl);
+				}
+				// Log into the application
+				loginPage.loginGoldLoan("CGCL2014");
+				if (driver.getCurrentUrl().equalsIgnoreCase("https://cggl-dev.capriglobal.in/dashboard")) {
+					test.log(Status.PASS, "logged in successfully with user CGCL2014");
+				} else {
+					test.log(Status.FAIL, "login failed");
+
+				}
+
+				// Navigate to Scheme Master
+				schemeMaster.navigateToSchemeMaster();
+				test.log(Status.PASS, "Navigated to Scheme Master page");
 
 				// Create a new scheme
 				schemeMaster.createNewScheme(schemeName, schemeCalendar, schemeDescription, schemeType, schemeLTV,
 						schemeMinimumLoanAmount, schemeMaximumLoanAmount, schemeRateOfInterest, schemeLoanTenure,
 						schemeAdditionalRateOfInterest, schemeRepaymentFrequency, schemeFeeName, schemeFeeType,
 						schemeFeeAmount);
+				test.log(Status.INFO, "Alert Message : " + schemeMaster.getValidationMessage());
 				if (!schemeMaster.getValidationMessage().equalsIgnoreCase("Scheme name exists.")) {
 					test.log(Status.PASS, "Scheme created successfully with name: " + schemeName);
 				} else {
