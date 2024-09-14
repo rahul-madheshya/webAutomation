@@ -61,8 +61,7 @@ public class CreateLoan extends BaseSetup {
 	}
 
 	@Test(dataProvider = "excelData", dataProviderClass = ExcelReadAndWrite.class)
-	void createScheme(String testCaseId, String testCaseName, String customerId, String loanAmount, String schemeName,
-			String goldPouchNumber, String applicationNumber, Method method) throws Exception {
+	void createScheme(String testCaseId, String testCaseName, String customerId, String loanAmount, String schemeName, String applicationNumber, Method method) throws Exception {
 		int rowIndex = getTestMethodIndex(method) + 1;
 		switch (testCaseId) {
 		case "TC_01":
@@ -94,14 +93,15 @@ public class CreateLoan extends BaseSetup {
 				createNewApplication.input_AppliedLoanDetails(loanAmount);
 				test.log(Status.INFO, "entered colendar and loan amount details to create new loan application");
 
-				completeMakerJourney(loanAmount, schemeName, goldPouchNumber);
+				completeMakerJourney(loanAmount, schemeName);
 				test.log(Status.INFO, "entered rrquired details to complete all the stages of maker journey");
 
 				logoutAndLoginWithEmployeeCode("CGCL002");
 				loanDisbursal.navigateToLoanDisbursal();
+				
 				applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
 				ExcelReadAndWrite.writeDataToExcel(rowIndex, "Application_Number", applicationNumber);
-
+				
 				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
 				loanDisbursal.startWithSearchedApplication();
 				loanCreationDeviation.submit_DeviationRemarks();
@@ -163,7 +163,7 @@ public class CreateLoan extends BaseSetup {
 				createNewApplication.input_AppliedLoanDetails(loanAmount);
 				test.log(Status.INFO, "entered colendar and loan amount details to create new loan application");
 
-				completeMakerJourney(loanAmount, schemeName, goldPouchNumber);
+				completeMakerJourney(loanAmount, schemeName);
 				test.log(Status.INFO, "entered rrquired details to complete all the stages of maker journey");
 
 				logoutAndLoginWithEmployeeCode("CGCL002");
@@ -200,6 +200,77 @@ public class CreateLoan extends BaseSetup {
 				throw exception;
 			}
 			break;
+		case "TC_03":
+			try {
+
+				// Start logging the test case in the Extent Report
+				test = extent.createTest(testCaseName, "test for creating a new loan with provided data");
+
+				if(!driver.getCurrentUrl().equalsIgnoreCase(baseUrl))
+				{
+					driver.navigate().to(baseUrl);
+				}
+				// Log into the application
+				loginPage.loginGoldLoan("CGCL2014");
+				if (driver.getCurrentUrl().equalsIgnoreCase("https://cggl-dev.capriglobal.in/dashboard")) {
+					test.log(Status.PASS, "logged in successfully with user CGCL2014");
+				} else {
+					test.log(Status.FAIL, "login failed");
+
+				}
+
+				// Navigate to Loan Disbursal
+				loanDisbursal.navigateToLoanDisbursal();
+				test.log(Status.INFO, "navigated to Loan Disbursal page");
+
+				// Navigate to Create Loan Page
+				loanDisbursal.navigateToCreateNewLoanPage();
+
+				loanDisbursalSearch.getCustomerDetails(customerId);
+				loanDisbursalSearch.proceedToNewLoanCreation();
+				test.log(Status.INFO, "fetched customer details and proceeded to new loan creation");
+
+				createNewApplication.input_AppliedLoanDetails(loanAmount);
+				test.log(Status.INFO, "entered colendar and loan amount details to create new loan application");
+
+				completeMakerJourney(loanAmount, schemeName);
+				test.log(Status.INFO, "entered rrquired details to complete all the stages of maker journey");
+
+				logoutAndLoginWithEmployeeCode("CGCL002");
+				loanDisbursal.navigateToLoanDisbursal();
+				
+				applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
+				ExcelReadAndWrite.writeDataToExcel(rowIndex, "Application_Number", applicationNumber);
+				
+				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
+				loanDisbursal.startWithSearchedApplication();
+				loanCreationDeviation.submit_DeviationRemarks();
+				loanDisbursal.startWithSearchedApplication();
+				loanCreationChecker.submit_CheckerRemarks();
+				test.log(Status.INFO,
+						"logout Maker user and login with super user to complete the deviation and checker stage");
+
+				logoutAndLoginWithEmployeeCode("CGCL2014");
+				test.log(Status.INFO,
+						"logout super user and login with maker user to complete disbursement of the newly created application");
+
+				loanDisbursal.navigateToLoanDisbursal();
+				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
+				loanDisbursal.startWithSearchedApplication();
+				loanCreationDisbursement.submit_DisbursmentDetails();
+
+				if (loanCreationDisbursement.getMessage().startsWith("Congratulations, the loan account number"))
+					test.log(Status.PASS, loanCreationDisbursement.getMessage());
+				else
+					test.log(Status.FAIL, loanCreationDisbursement.getMessage());
+
+			} catch (Exception exception) {
+				// Log the failure in the report
+				test.log(Status.FAIL, "Test failed due to: " + exception.getMessage());
+				throw exception;
+			}
+			break;
+
 		}
 
 	}
@@ -223,7 +294,7 @@ public class CreateLoan extends BaseSetup {
 		loanCreationDisbursement = new LoanCreationDisbursement(driver);
 	}
 
-	private void completeMakerJourney(String loanAmount, String schemeName, String goldPouchNumber)
+	private void completeMakerJourney(String loanAmount, String schemeName)
 			throws InterruptedException {
 		loanMaker_Stage1.input_CollateralDetails();
 		loanMaker_Stage2.input_ConsolidatedCollateralDetails();
@@ -232,8 +303,7 @@ public class CreateLoan extends BaseSetup {
 		loanMaker_Stage5.submit_FeeDetails();
 		loanMaker_Stage6.submit_FundTrasferDetails();
 		loanMaker_Stage7.submit_NetDisbursementDetails();
-		goldPouchNumber = "GLBS" + AbstractUtility.generateRandomNumber(1111111, 9999999);
-		loanMaker_Stage8.input_AdditionalGoldInformation(goldPouchNumber, "1000");
+		loanMaker_Stage8.input_AdditionalGoldInformation("1000");
 		loanMaker_Stage9.submit_CustomerLoanDetails();
 
 	}

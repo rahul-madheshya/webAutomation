@@ -44,6 +44,7 @@ public class LoanMaker_Stage3 extends AbstractUtility {
 	WebElement button_submitMakerStage3;
 
 	public void input_GoldInformation() throws InterruptedException {
+		waitforSecond(2);
 		get_GoldSource.click();
 		select_GoldSource.get(0).click();
 		get_GoldEndUse.click();

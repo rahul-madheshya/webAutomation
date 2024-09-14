@@ -32,9 +32,8 @@ public class LoanMaker_Stage8 extends AbstractUtility {
 	@FindBy(xpath = "//button[@type='submit'][text()='Next']")
 	WebElement button_submitMakerStage8;
 
-	public void input_AdditionalGoldInformation(String goldPouchNumber, String goldPouchTareWeight)
-			throws InterruptedException {
-		inputGoldPouchNumber.sendKeys(goldPouchNumber);
+	public void input_AdditionalGoldInformation(String goldPouchTareWeight) throws InterruptedException {
+		inputGoldPouchNumber.sendKeys(generateGoldPouchNumber());
 		inputGoldPouchTareWeight.sendKeys(goldPouchTareWeight);
 		IntStream.range(0, input_Justification.size()).forEach(i -> {
 			input_Justification.get(i).sendKeys("Justification Remarks " + (i + 1));
@@ -46,5 +45,14 @@ public class LoanMaker_Stage8 extends AbstractUtility {
 			}
 		});
 		button_submitMakerStage8.click();
+	}
+
+	private String generateGoldPouchNumber() {
+		String goldPouchNumber = "GLBS" + generateRandomNumber(1111111, 9999999);
+		if (goldPouchNumber.length() > 11)
+		{
+			goldPouchNumber = goldPouchNumber.substring(0, 11);
+		}
+		return goldPouchNumber;
 	}
 }
