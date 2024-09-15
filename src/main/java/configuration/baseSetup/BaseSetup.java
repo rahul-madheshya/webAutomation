@@ -11,7 +11,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
-
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import commonUtilities.ExtentReportSetup;
@@ -20,13 +19,13 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 public class BaseSetup {
 
 	protected WebDriver driver;
-	public static String environment, baseUrl, usernameMaker, passwordMaker, usernameChecker, passwordChecker,
-			homeBranch;
+	private String environment;
+	public static String baseUrl, usernameMaker, passwordMaker, usernameChecker, passwordChecker, homeBranch;
 	private String browserType;
 	private boolean isHeadless, isIncognito;
 	private int timeout;
 	protected ExtentReports extent;
-    protected ExtentTest test;
+	protected ExtentTest test;
 
 	@SuppressWarnings("deprecation")
 	@BeforeSuite
@@ -69,7 +68,7 @@ public class BaseSetup {
 	@AfterSuite
 	public void closeBrowser() {
 		if (driver != null) {
-			driver.quit();
+			//driver.quit();
 		}
 		ExtentReportSetup.tearDownExtentReport();
 	}
@@ -95,12 +94,12 @@ public class BaseSetup {
 		isIncognito = Boolean.parseBoolean(config.getProperty("browser.incognito"));
 		timeout = Integer.parseInt(config.getProperty("timeout"));
 	}
-	
-	private void initializeExtentReport()
-	{
+
+	private void initializeExtentReport() {
 		// Initialize the Extent Report before tests
 		ExtentReportSetup.setUpExtentReport();
-        extent = ExtentReportSetup.extent;
-	
+		extent = ExtentReportSetup.extent;
+
 	}
+
 }

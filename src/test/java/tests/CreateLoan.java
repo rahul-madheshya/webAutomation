@@ -3,6 +3,7 @@ package tests;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import commonUtilities.AbstractUtility;
 import commonUtilities.ExcelReadAndWrite;
@@ -49,8 +50,7 @@ public class CreateLoan extends BaseSetup {
 	private LoanCreationDeviation loanCreationDeviation;
 	private LoanCreationChecker loanCreationChecker;
 	private LoanCreationDisbursement loanCreationDisbursement;
-	private static Map<String, Integer> testMethodCounts = new HashMap<>(); // Keeps track of loop counts for each
-																			// method
+	private static Map<String, Integer> testMethodCounts = new HashMap<>();
 
 	@BeforeClass
 	void setupTest() {
@@ -61,7 +61,8 @@ public class CreateLoan extends BaseSetup {
 	}
 
 	@Test(dataProvider = "excelData", dataProviderClass = ExcelReadAndWrite.class)
-	void createScheme(String testCaseId, String testCaseName, String customerId, String loanAmount, String schemeName, String applicationNumber, Method method) throws Exception {
+	void createLoan(String testCaseId, String testCaseName, String customerId, String loanAmount, String schemeName,
+			String applicationNumber, Method method) throws Exception {
 		int rowIndex = getTestMethodIndex(method) + 1;
 		switch (testCaseId) {
 		case "TC_01":
@@ -78,7 +79,7 @@ public class CreateLoan extends BaseSetup {
 					test.log(Status.FAIL, "login failed");
 
 				}
-
+				
 				// Navigate to Loan Disbursal
 				loanDisbursal.navigateToLoanDisbursal();
 				test.log(Status.INFO, "navigated to Loan Disbursal page");
@@ -98,10 +99,10 @@ public class CreateLoan extends BaseSetup {
 
 				logoutAndLoginWithEmployeeCode("CGCL002");
 				loanDisbursal.navigateToLoanDisbursal();
-				
+
 				applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
 				ExcelReadAndWrite.writeDataToExcel(rowIndex, "Application_Number", applicationNumber);
-				
+
 				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
 				loanDisbursal.startWithSearchedApplication();
 				loanCreationDeviation.submit_DeviationRemarks();
@@ -136,11 +137,12 @@ public class CreateLoan extends BaseSetup {
 				// Start logging the test case in the Extent Report
 				test = extent.createTest(testCaseName, "test for creating a new loan with provided data");
 
-				if(!driver.getCurrentUrl().equalsIgnoreCase(baseUrl))
-				{
+				if (!driver.getCurrentUrl().equalsIgnoreCase(baseUrl)) {
 					driver.navigate().to(baseUrl);
 				}
+
 				// Log into the application
+				loginPage.resetUsernamePassword();
 				loginPage.loginGoldLoan("CGCL2014");
 				if (driver.getCurrentUrl().equalsIgnoreCase("https://cggl-dev.capriglobal.in/dashboard")) {
 					test.log(Status.PASS, "logged in successfully with user CGCL2014");
@@ -148,6 +150,7 @@ public class CreateLoan extends BaseSetup {
 					test.log(Status.FAIL, "login failed");
 
 				}
+
 
 				// Navigate to Loan Disbursal
 				loanDisbursal.navigateToLoanDisbursal();
@@ -168,10 +171,10 @@ public class CreateLoan extends BaseSetup {
 
 				logoutAndLoginWithEmployeeCode("CGCL002");
 				loanDisbursal.navigateToLoanDisbursal();
-				
+
 				applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
 				ExcelReadAndWrite.writeDataToExcel(rowIndex, "Application_Number", applicationNumber);
-				
+
 				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
 				loanDisbursal.startWithSearchedApplication();
 				loanCreationDeviation.submit_DeviationRemarks();
@@ -206,11 +209,11 @@ public class CreateLoan extends BaseSetup {
 				// Start logging the test case in the Extent Report
 				test = extent.createTest(testCaseName, "test for creating a new loan with provided data");
 
-				if(!driver.getCurrentUrl().equalsIgnoreCase(baseUrl))
-				{
+				if (!driver.getCurrentUrl().equalsIgnoreCase(baseUrl)) {
 					driver.navigate().to(baseUrl);
 				}
 				// Log into the application
+				loginPage.resetUsernamePassword();
 				loginPage.loginGoldLoan("CGCL2014");
 				if (driver.getCurrentUrl().equalsIgnoreCase("https://cggl-dev.capriglobal.in/dashboard")) {
 					test.log(Status.PASS, "logged in successfully with user CGCL2014");
@@ -238,10 +241,10 @@ public class CreateLoan extends BaseSetup {
 
 				logoutAndLoginWithEmployeeCode("CGCL002");
 				loanDisbursal.navigateToLoanDisbursal();
-				
+
 				applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
 				ExcelReadAndWrite.writeDataToExcel(rowIndex, "Application_Number", applicationNumber);
-				
+
 				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
 				loanDisbursal.startWithSearchedApplication();
 				loanCreationDeviation.submit_DeviationRemarks();
@@ -294,8 +297,7 @@ public class CreateLoan extends BaseSetup {
 		loanCreationDisbursement = new LoanCreationDisbursement(driver);
 	}
 
-	private void completeMakerJourney(String loanAmount, String schemeName)
-			throws InterruptedException {
+	private void completeMakerJourney(String loanAmount, String schemeName) throws InterruptedException {
 		loanMaker_Stage1.input_CollateralDetails();
 		loanMaker_Stage2.input_ConsolidatedCollateralDetails();
 		loanMaker_Stage3.input_GoldInformation();

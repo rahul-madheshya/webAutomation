@@ -5,8 +5,8 @@
     <classes>
       <class name="tests.CreateLoan">
         <methods>
+          <include name="createLoan" invocation-numbers="0"/>
           <include name="setupBrowser"/>
-          <include name="createScheme" invocation-numbers="0 1 2"/>
           <include name="closeBrowser"/>
           <include name="setupTest"/>
         </methods>

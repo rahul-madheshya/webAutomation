@@ -6,8 +6,7 @@ import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 public class ExtentReportSetup {
 
     public static ExtentReports extent;
-    public static ExtentSparkReporter spark;
-    public static ExtentTest test;
+    private static ExtentSparkReporter spark;
 
     // Method to set up the Extent Report
     public static void setUpExtentReport() {

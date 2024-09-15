@@ -3,6 +3,7 @@ package commonUtilities;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.time.Duration;
+import java.util.List;
 import java.util.Random;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
@@ -37,6 +38,12 @@ public class AbstractUtility {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 		wait.until(ExpectedConditions.visibilityOf(element));
 	}
+	
+	protected void waitForElementsToBeVisible(List<WebElement> elements) {
+	    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+	    wait.until(ExpectedConditions.visibilityOfAllElements(elements));
+	}
+
 
 	protected void fluentWait(WebElement element) {
 		Wait<WebDriver> wait = new FluentWait<>(driver).withTimeout(Duration.ofSeconds(35))
