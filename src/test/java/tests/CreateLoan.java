@@ -62,7 +62,7 @@ public class CreateLoan extends BaseSetup {
 
 	@Test(dataProvider = "excelData", dataProviderClass = ExcelReadAndWrite.class)
 	void createLoan(String testCaseId, String testCaseName, String customerId, String loanAmount, String schemeName,
-			String applicationNumber, Method method) throws Exception {
+			String goldPouchNumber, String applicationNumber, Method method) throws Exception {
 		int rowIndex = getTestMethodIndex(method) + 1;
 		switch (testCaseId) {
 		case "TC_01":
@@ -77,7 +77,6 @@ public class CreateLoan extends BaseSetup {
 					test.log(Status.PASS, "logged in successfully with user CGCL2014");
 				} else {
 					test.log(Status.FAIL, "login failed");
-
 				}
 				
 				// Navigate to Loan Disbursal
@@ -99,6 +98,9 @@ public class CreateLoan extends BaseSetup {
 
 				logoutAndLoginWithEmployeeCode("CGCL002");
 				loanDisbursal.navigateToLoanDisbursal();
+				
+				goldPouchNumber = loanMaker_Stage8.get_goldPouchNumber();
+				ExcelReadAndWrite.writeDataToExcel(rowIndex, "Gold_Pouch_number", goldPouchNumber);
 
 				applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
 				ExcelReadAndWrite.writeDataToExcel(rowIndex, "Application_Number", applicationNumber);
@@ -244,7 +246,7 @@ public class CreateLoan extends BaseSetup {
 
 				applicationNumber = loanDisbursal.getNewCreatedLoanApplicationNumber();
 				ExcelReadAndWrite.writeDataToExcel(rowIndex, "Application_Number", applicationNumber);
-
+				
 				loanDisbursal.searchApplicationByApplicationNumber(applicationNumber);
 				loanDisbursal.startWithSearchedApplication();
 				loanCreationDeviation.submit_DeviationRemarks();
